@@ -19,7 +19,7 @@ library(MdS2)
 testsample1 <- list()
 testsample2 <- list()
 
-for (m in 1:9) {
+for (m in 1:3) {
  testsample <- huge.generator(n = 10, d = 50, graph ="scale-free")
  testsample1[[m]] <- testsample$data
  testsample2[[m]] <- testsample$omega
@@ -37,7 +37,7 @@ w[which(upper.tri(w, diag = TRUE)==TRUE)] <- 0
 
 
 
-wat <- MdS(Y = testsample1, w = w, dims = c(3,3), lambda1 = 0.2,lambda2 = 0.3, rho = 1, psi = "L1", maxIter = 200)
+wat <- MdS(Y = testsample1, w = w, dims = c(3,1), lambda1 = 0.2,lambda2 = 0.3, rho = 1, maxIter = 100)
 
 wat2 <- JGL(testsample1, lambda1 = 0.1, lambda2 = 0.2)
 y <- vector(mode = "double", length = 9)

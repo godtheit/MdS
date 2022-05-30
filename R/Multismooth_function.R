@@ -1,4 +1,4 @@
-MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, epsilon = 1e-3, maxIter = 1000){
+MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3, maxIter = 1000){
 
   library(DescTools)
 
@@ -66,7 +66,6 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, eps
   }
 
   k <- 0
-  verschiebung <- 0
 
 
   #_old ist immer die k-te Iteration, _old2 die k-1 te
@@ -106,7 +105,8 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, eps
 
 
 
-  cat(" Iterationstep ", k)
+  cat(" Iterationstep ", k, "
+      ")
 
   # M1 <- 1:M
   # M2 <- 1:M
@@ -135,7 +135,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, eps
   for (m in 1:M) {
     S[[m]] <- (t(Y[[m]]) %*% Y[[m]]) / n[m]
     A[[m]] <- ((Z_old[[m]] - U_old[[m]]) )
-    eta[[m]] <- n[m] / rho    #n probably not the same for all m, maybe change this later
+    eta[[m]] <- n[m] / rho
 
   }
 
@@ -161,7 +161,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, eps
    eta_1 <- lambda1/rho
    eta_2 <- lambda2/rho
 
-
+## Create Matrix D
      signum <- c(c(1,1), vector(mode = "integer",length = M-2))
      B <-  Permn(signum)
      Flipp <- FALSE
@@ -186,7 +186,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, eps
      C <- eta_1 * diag(M)
      D <- rbind(C, B_final)
 
-
+### Use generalized Lasso on all possible Edges
 
      yps <- betas <- vector(mode = "double", length = M)
      I <- diag(M)
@@ -202,7 +202,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, eps
 
 
 
-         genL <- dualpath(y = yps,  D = D, verbose = TRUE)
+         genL <- dualpath(y = yps,  D = D, verbose = F)
           #genL <- genlasso(y = yps, X = I, D =D, verbose = T, minlam = 1) # Hier fehlt irgendwie das lambda
           for (m in 1:M) {
             Z[[m]][i,j] <- genL$beta[,1][m]
@@ -275,6 +275,8 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w ,psi = "L1", dims, eps
     k <- k + 1
     diff_value = 0
     for(m in 1:M) {diff_value = diff_value + sum(abs(Theta[[m]] - Theta_old[[m]])) / sum(abs(Theta_old[[m]]))}
+    cat("Difference  ", diff_value, "
+        ")
 
 
    }#Ende While, bzw Repeat
