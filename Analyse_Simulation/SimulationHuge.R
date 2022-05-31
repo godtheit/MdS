@@ -11,7 +11,7 @@ library(ggplot2)
 
 
 #path <-"C:/Users/Arne/Dropbox/Masterarbeit/Multidimensional-Smoothing/R"
-path <- "C:/Users/arne2/Dropbox/Masterarbeit/Multidimensional-Smoothing/R"
+#path <- "C:/Users/arne2/Dropbox/Masterarbeit/Multidimensional-Smoothing/R"
 source("Emulate_graph.R")
 source("Get_corr.R")
 set.seed(20)
@@ -36,20 +36,20 @@ for (t in 1:N) {
   listof_covs <- list()
   listof_samples <- list()
   listof_graphs <- tmp[[2]]
-  
+
   for (x in 1:length(listof_adjencies)) {
    test <- get_cor(theta = listof_adjencies[[x]], p = p, observes = observes)
-   
-   listof_covs[[x]] <- test[[1]] 
+
+   listof_covs[[x]] <- test[[1]]
    listof_samples[[x]] <- test [[2]]
   }
-  
+
   BigListof_adjencies[[BigCount]] <- listof_adjencies
   BigListof_covs[[BigCount]] <- listof_covs
   BigListof_samples[[BigCount]] <- listof_samples
   BigListof_graphs[[BigCount]] <- listof_graphs
 
-  
+
   BigCount <- BigCount + 1
 
 
@@ -74,19 +74,19 @@ maxMat <- matrix(0,1,length_var1*length_var2)
   for (r in 1:(length_var1*length_var2)) {
     maxMat[r] <- max(degree(BigListof_graphs[[t]][[r]]))
   }
-  
+
 count <- 1
 plotter <- matrix(0,(length_var1*length_var2), max(maxMat)+1)
 colnames(plotter) <- 0:max(maxMat)
 for (i in 1:length_var1) {
   for(j in 1:length_var2){
     temp <- degree.distribution(BigListof_graphs[[t]][[count]])
-    plotter[count,1:length(temp)] <- temp 
+    plotter[count,1:length(temp)] <- temp
     names(plotter) <- 0:(length(plotter)-1)
     test <- as.data.frame(plotter)
-    
-    
-   
+
+
+
     png(file=paste(path, "/Theta_",i,j , ".png", sep = ""))
     par(mar = c(5.1, 3, 4.1, 10))
     barplot(plotter[count,],
@@ -106,18 +106,18 @@ for (i in 1:length_var1) {
 
 
 # zahl <- 1
-#  
+#
 #   for (i in 1:length_var1) {
 #     for (j in 1:length_var2) {
-#       
+#
 #    somegraph <- tmp[[2]][[zahl]]
-#    
+#
 #       png(file=paste(path, "/Pictures/Graphs_",t,"/Theta_",
 #                      i, j, ".png", sep = ""))
-#       
+#
 #       plot.igraph(somegraph)
 #       dev.off()
-#       
+#
 #     }
 #     zahl <- zahl + 1
 #   }

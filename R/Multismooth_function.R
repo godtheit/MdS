@@ -2,9 +2,9 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
   library(DescTools)
 
-  p = dim(Y[[1]])[2]
-  M = length(Y)
-  n = rep(0, M)
+  p = dim(Y[[1]])[2] # number of variables
+  M = length(Y)      # number of networks
+  n = rep(0, M)      # number observations for each network
   for (m in 1:M) {
     n[m] = dim(Y[[m]])[1]
   }
@@ -14,7 +14,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
     }
   }
 
-  #Daten Normalisieren
+  #Daten zentralisieren
   for (m in 1:M) {
     for (j in 1:p) {
       Y[[m]][, j] = Y[[m]][, j] - mean(Y[[m]][, j])
@@ -61,15 +61,14 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
 
   for (m in 1:M) {
-    Theta[[m]] <- Z[[m]] <- U[[m]] <- betas[[m]] <- Empty
+    Theta[[m]] <- Z[[m]] <- U[[m]] <- betas[[m]] <- Empty    #Start the algorithm with a empty network
 
   }
 
   k <- 0
 
 
-  #_old ist immer die k-te Iteration, _old2 die k-1 te
-  # ohne index k+1
+
   #exitStatement <- matrix(FALSE, M, 1)
 
 
@@ -105,8 +104,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
 
 
-  cat(" Iterationstep ", k, "
-      ")
+  cat(" Iterationstep ", k, "\n")
 
   # M1 <- 1:M
   # M2 <- 1:M
@@ -133,7 +131,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
     A <- list()
 
   for (m in 1:M) {
-    S[[m]] <- (t(Y[[m]]) %*% Y[[m]]) / n[m]
+    S[[m]] <- (t(Y[[m]]) %*% Y[[m]]) / n[m]   #empirical covariance
     A[[m]] <- ((Z_old[[m]] - U_old[[m]]) )
     eta[[m]] <- n[m] / rho
 
@@ -141,8 +139,10 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
 
     for (m in 1:M) {
+
+      #formula for theta from danaher/hallac
     G <- (eta[[m]]^(-1)) * ((A[[m]] + t(A[[m]]))/2 ) - S[[m]]
-    G_Eigen <- eigen(G)
+    G_Eigen <- eigen(G) #-1 for danaher formula
 
     Q <- G_Eigen$vectors
     D <- diag(G_Eigen$values)
@@ -203,7 +203,9 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
 
          genL <- dualpath(y = yps,  D = D, verbose = F)
-          #genL <- genlasso(y = yps, X = I, D =D, verbose = T, minlam = 1) # Hier fehlt irgendwie das lambda
+           #genL<- genlasso::genlasso (y = yps, X = I, D =D, verbose = T, minlam = 1) # Hier fehlt irgendwie das lambda
+
+
           for (m in 1:M) {
             Z[[m]][i,j] <- genL$beta[,1][m]
           }
@@ -272,6 +274,8 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
     #save them for later and compare them
 
+
+     # Stopping Criterea from Danaher
     k <- k + 1
     diff_value = 0
     for(m in 1:M) {diff_value = diff_value + sum(abs(Theta[[m]] - Theta_old[[m]])) / sum(abs(Theta_old[[m]]))}

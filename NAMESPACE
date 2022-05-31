@@ -7,3 +7,4 @@ export("add",
 
 useDynLib(MdS2, add_)
 useDynLib(MdS2, C_maketri2)
+useDynLib(MdS2, C_downdate2)
