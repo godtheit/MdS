@@ -1,6 +1,7 @@
-MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3, maxIter = 1000){
+MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , dims, epsilon = 1e-3, cores = 1,  maxIter = 1000){
 
   library(DescTools)
+  library(parallel)
 
   p = dim(Y[[1]])[2] # number of variables
   M = length(Y)      # number of networks
@@ -54,14 +55,14 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
 
   Empty <- matrix(0,p,p)
-  Ones <- matrix (1,p,p)
-  Eps <- matrix(epsilon,p,p)
+
   Theta <- Z  <- U <- betas <- list()
 
 
 
   for (m in 1:M) {
-    Theta[[m]] <- Z[[m]] <- U[[m]] <- betas[[m]] <- Empty    #Start the algorithm with a empty network
+    Theta[[m]] <- diag(p)
+    Z[[m]] <- U[[m]] <- betas[[m]] <- Empty    #Start the algorithm with a empty network
 
   }
 
@@ -69,7 +70,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
 
 
-  #exitStatement <- matrix(FALSE, M, 1)
+
 
 
   diff_value = 10
@@ -104,7 +105,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
 
 
 
-  cat(" Iterationstep ", k, "\n")
+
 
   # M1 <- 1:M
   # M2 <- 1:M
@@ -153,11 +154,18 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
     Theta[[m]] <- Theta_k
   }
 
+    #Update Step Z
+
+
     y <- list()
-     #Update Step Z
+
       for (m in 1:M) {
        y[[m]] <- Theta[[m]] + U_old[[m]]
-     }
+      }
+
+
+    #y <- mapply(function(x,y){x+y}, Theta, U_old)
+
    eta_1 <- lambda1/rho
    eta_2 <- lambda2/rho
 
@@ -186,31 +194,68 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
      C <- eta_1 * diag(M)
      D <- rbind(C, B_final)
 
-### Use generalized Lasso on all possible Edges
-
-     yps <- betas <- vector(mode = "double", length = M)
-     I <- diag(M)
-     counter <- 1
-     for (i in 1:p) {
-       for (j in 1:p) {
-         for (m in 1:M) {
-           yps[m] <- -y[[m]][i,j]
-           betas[m] <- Z_old[[m]][i,j]
-
-         }
-         betas <- as.matrix(betas)
 
 
-
-         genL <- dualpath(y = yps,  D = D, verbose = F)
-           #genL<- genlasso::genlasso (y = yps, X = I, D =D, verbose = T, minlam = 1) # Hier fehlt irgendwie das lambda
-
-
-          for (m in 1:M) {
-            Z[[m]][i,j] <- genL$beta[,1][m]
-          }
-       }
+     for (m in 1:M) {
+       diag(Z[[m]]) <- diag(y[[m]])
      }
+
+
+     ### Use generalized Lasso on all possible Edges
+combinations <- combn(1:p, 2, simplify = FALSE)
+
+mclapply(combinations, function(combs){
+  yps <- sapply(y, function(M) M[combs[1], combs[2]])
+
+
+
+  #genL <- dualpath(y = yps, D = D, verbose = FALSE)
+  #out <- genL$beta
+
+  genL <- genlasso(y = yps, diag(1, m), D, minlam = 1, verbose = F)
+  out <- coef(genL, lambda = 1)$beta
+
+  out[which(abs(out) <= 10^-12)] <- 0
+
+  for (m in 1:M) {
+    Z[[m]][combs[1],combs[2]] <<- Z[[m]][combs[2],combs[1]]  <<- out[m]
+  }
+
+}, mc.cores = cores )
+
+#also fill in the diagonal
+
+
+
+     # for (i in 1:p) {
+     #   for (j in 1:p) {
+     #     for (m in 1:M) {
+     #       yps[m] <- -y[[m]][i,j]
+     #     }
+     #     genL <- dualpath(y = yps,  D = D, verbose = F)
+     #       #genL<- genlasso::genlasso (y = yps, X = I, D =D, verbose = T, minlam = 1) # Hier fehlt irgendwie das lambda
+     #      for (m in 1:M) {
+     #        Z[[m]][i,j] <- genL$beta[,1][m]
+     #      }
+     #   }
+     # }
+
+     # mclapply(combinations, function(combination) {
+     #   # obtain the vector y for the generalized LASSO
+     #   y <- sapply(B, function(M) M[combination[1], combination[2]])
+     #
+     #   # apply the generalized LASSO
+     #   out <- genlasso(y, diag(1, m), D, minlam = 1)
+     #   beta <- coef(out, lambda = 1)$beta
+     #
+     #   beta[which(abs(beta) <= 10^-12)] <- 0
+     #
+     #   # update the matrix Z (use that it is symmetric)
+     #   for (m in 1:M) {
+     #     Z[[m]][combination[1], combination[2]] <<- beta[i]
+     #     Z[[m]][combination[2], combination[1]] <<- beta[i]
+     #   }
+     # })
 
 
 
@@ -279,16 +324,38 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1,lambda2= 0.1, w , dims, epsilon = 1e-3
     k <- k + 1
     diff_value = 0
     for(m in 1:M) {diff_value = diff_value + sum(abs(Theta[[m]] - Theta_old[[m]])) / sum(abs(Theta_old[[m]]))}
-    cat("Difference  ", diff_value, "
-        ")
+
+    cat(sprintf("iteration %d  |  %f\n", k, diff_value))
 
 
    }#Ende While, bzw Repeat
 
+#aus danaher, absoluter unterschied von Theta und Z
+  diff = 0; for(m in 1:M){diff = diff + sum(abs(Theta[[m]]-Z[[m]]))}
+
+  adj_matrices <- list()
+
+
+  for (m in 1:M) {
+      adj <- Empty
+      adj[which(Z[[m]]!=0)] <- 1
+      diag(adj) <- 0
+      adj[upper.tri(adj, diag = T) == TRUE] <- 0
+      #adj <- adj[which(lower.tri(adj))==TRUE]
+      adj_matrices[[m]]<- adj
+    }
 
 
 
 
-  return(Theta)
+  res <- list(
+    Theta = Z,
+    adj_matrices = adj_matrices
+  )
+
+  class(res) <- "Multismoothed_Func"
+
+  return(res)
+
 }
 

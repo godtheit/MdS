@@ -14,56 +14,59 @@ setwd("C:/Users/arne2/Dropbox/Masterarbeit/MdS/Analyse_simulation")
 #load("allgraphs.RData")
 #source("Berechnung_Z.R")
 
-#load("allsamples.RData")
-
-testsample1 <- list()
-testsample2 <- list()
-
-for (m in 1:9) {
- testsample <- huge.generator(n = 10, d = 50, graph ="scale-free")
- testsample1[[m]] <- testsample$data
- #testsample2[[m]] <- testsample$omega
-}
+load("allsamples.RData")
+load("alladjacs.RData")
+#testsample1 <- list()
+#testsample2 <- list()
+set.seed(20)
+#for (m in 1:2) {
+# testsample <- huge.generator(n = 1000, d = 5, graph ="scale-free")
+# testsample1[[m]] <- testsample$data
+# testsample2[[m]] <- testsample$omega
+#}
 
 #fgl.results = JGL(Y=testsample1, penalty="fused",lambda1=.25,lambda2=.1)
-
+filefortest <- readRDS("test-dataset.RDS")
 #source("Multismooth_function.R")
 dims <-c(3,3)
 
-w <- matrix(0.5,prod(dims),prod(dims))
+w <- matrix(1 ,prod(dims),prod(dims))
 w[which(upper.tri(w, diag = TRUE)==TRUE)] <- 0
 
+wat2 <- MdS(Y = filefortest[[2]],w = w, dims = c(1,2), lambda1 = 10, lambda2 = 1, rho = 1, maxIter = 20, epsilon = 1e-4)
+
+
+wat2$adj_matrices[[1]]
 
 
 
 
-wat <- MdS(Y = testsample1, w = w, dims = c(3,3), lambda1 = 0.2,lambda2 = 0.3, rho = 1, maxIter = 1000)
+
+bigtestsample <- BigListof_samples[[1]]
+
+wat <- MdS(Y = bigtestsample, w = w, dims = c(3,3), lambda1 = 1,lambda2 = 1, rho = 1, maxIter = 2000)
 
 
-List_Estimations <- list()
 
-for (t in 1:length(BigListof_samples)) {
+List_Estimations_glasso <- list()
+List_Estimations_FusedLasso <- list()
+List__Estimations_Mds <- list()
+
+for (t in 1){            ##length(BigListof_samples)) {
   estimation_tmp <- list()
 
   for (z in 1:sum(dims)) {
     tmp <- BigListof_samples[[t]][[z]]
-    x <- huge(tmp, method = "glasso")
+    x <- huge(tmp,  method = "glasso")
     y <- huge.select(x, criterion = "ric")
-  estimation_tmp[[z]] <- test
+
+    estimation_tmp[[z]] <- y$opt.icov
+
   }
-List_Estimations[[t]] <- estimation_tmp
+List_Estimations_glasso[[t]] <- estimation_tmp
+List_Estimations_FusedLasso[[t]] <- JGL(BigListof_samples[[t]], lambda1 = 5, lambda2 = 1, penalty = "fused", return.whole.theta = T)
+List__Estimations_Mds[[t]] <- MdS(BigListof_samples[[t]], lambda1 = 5, lambda2 = 2, w = w, dims = c(3,3))
 }
 
-
-
-
-
-
-
-
-
-Samples <- BigListof_samples[[1]]
-Samp_11 <- Samples[[1]]
-glasso()
-help(glasso)
-H <- huge.glasso(Samp_11)
+mds1 <- MdS(filefortest[[2]],dims = c(1,2), lambda1 = 3, lambda2 = 1, rho = 1, w = w)
+jgl1 <- JGL(filefortest[[2]], lambda1 = 0.1, lambda2 = 0.1, penalty = "fused", return.whole.theta = T)

@@ -41,7 +41,7 @@ dualpathTall <- function(y, D, Q1, Q2, R, q0, approx=FALSE, maxsteps=2000,
     h = logical(buf)           # Hit or leave?
     df = numeric(buf)          # Degrees of freedom
 
-    lams[1] = hit
+    lams[1] = hit # hier auf 1 setzen?
     h[1] = TRUE
     df[1] = q0
     u[,1] = uhat
@@ -84,7 +84,7 @@ dualpathTall <- function(y, D, Q1, Q2, R, q0, approx=FALSE, maxsteps=2000,
 
   tryCatch({
     #while (k<=maxsteps && lams[k-1]>=minlam) {
-    lams <- 1
+
       ##########
       # Check if we've reached the end of the buffer
       if (k > length(lams)) {
