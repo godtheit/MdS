@@ -196,6 +196,10 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , dims, epsilon = 1e-
 
 
 
+     row_with_only_zeros <- apply(D, 1, function(row) all(row == 0))
+     D <- D[!row_with_only_zeros, ]
+
+
      for (m in 1:M) {
        diag(Z[[m]]) <- diag(y[[m]])
      }
@@ -350,7 +354,12 @@ mclapply(combinations, function(combs){
 
   res <- list(
     Theta = Z,
-    adj_matrices = adj_matrices
+    adj_matrices = adj_matrices,
+    S = S,
+    n = n,
+    lambda1 = lambda1,
+    lambda2 = lambda2,
+    rho = rho
   )
 
   class(res) <- "Multismoothed_Func"

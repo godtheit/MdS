@@ -1,9 +1,6 @@
-export("add",
-	"MdS",
-	"dualpath",
-	"maketri2",
-	"dualpathTall"
-	)
+export(	"MdS")
+
+	
 
 #useDynLib(MdS2, add_)
 #useDynLib(MdS2, C_maketri2)
