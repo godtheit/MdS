@@ -1,6 +1,6 @@
-export(	"MdS")
+export(	"MdS", "mds_aic")
 
-	
+
 
 #useDynLib(MdS2, add_)
 #useDynLib(MdS2, C_maketri2)
