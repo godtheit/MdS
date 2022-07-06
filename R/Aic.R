@@ -1,4 +1,4 @@
-mds_aic <- function(Theta, S ,n, lambda1, lambda2) {
+mds_aic <- function(Theta, S ,n) {
 
   M <- length(Theta)
    #Number of non zero Elements

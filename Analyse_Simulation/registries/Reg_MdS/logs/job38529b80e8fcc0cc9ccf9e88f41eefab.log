@@ -1,0 +1,11 @@
+### [bt]: This is batchtools v0.9.15
+### [bt]: Starting calculation of 1 jobs
+### [bt]: Setting working directory to 'H:/Documents/MdS/Analyse_simulation'
+### [bt]: Memory measurement disabled
+### [bt]: Starting job [batchtools job.id=55]
+### [bt]: Setting seed to 8862 ...
+Error in (function (Y, lam1, lam2, method, w = FALSE)  : 
+  unused arguments (w.th11 = 0, w.th12 = 0, w.th13 = 0, w.th21 = 0, w.th22 = 0, w.th23 = 0, w.th31 = 0, w.th32 = 0, w.th33 = 0)
+
+### [bt]: Job terminated with an exception [batchtools job.id=55]
+### [bt]: Calculation finished!

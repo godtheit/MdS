@@ -1,4 +1,4 @@
-MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , dims, epsilon = 1e-3, cores = 1,  maxIter = 1000){
+MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cores = 1,  maxIter = 1000){
 
   library(DescTools)
   library(parallel)
