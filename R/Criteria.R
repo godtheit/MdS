@@ -54,7 +54,15 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
     }
 
     lam1_MdS <- lam1[which(MdS_crit1_list == max(MdS_crit1_list))]
-    if(length(lam1_MdS) > 1){lam1_MdS <- lam1_MdS[1] }
+
+    L1 <- length(lam1_MdS)
+    if(length(lam1_MdS) > 1){
+      lam1_MdS <- lam1_MdS[1]
+      multiple_lambda1 <- TRUE
+    } else {multiple_lambda1 <- FALSE}
+
+
+
 
     counter <- 1
     for (b in lam2) {
@@ -69,11 +77,23 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
                                    n = n)
     }
     lam2_MdS <- lam2[which((MdS_crit2_list) == max(MdS_crit2_list))]
-  if(length(lam2_MdS) > 1){
+
+
+    L2 <- length(lam2_MdS)
+
+
+    if(length(lam2_MdS) > 1){
     lam2_MdS <- lam2_MdS[1]
-    }
+    multiple_lambda2 <- TRUE
+  } else {multiple_lambda2 <- FALSE}
+
+
     estimation <- MdS_tmp2[[which(lam2 == lam2_MdS)]]
 
+
+    estimation$multiples <- list(multiple_lambda1, multiple_lambda2, L1, L2)
+
+    return(estimation)
   }
 
 
@@ -89,6 +109,7 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
 
 
   if(method == "fused"){
+    estimation <- list()
     JGL_tmp1 <- list()
     JGL_crit1_list <- matrix(0,length(lam1),1)
     JGL_tmp2 <- list()
@@ -118,7 +139,12 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
 
     #Suche das größte Kriterium
     lam1_JGL <- lam1[which(JGL_crit1_list == max(JGL_crit1_list))]
-    if(length(lam1_JGL) > 1){lam1_JGL <- lam2_JGL[1] }
+    L1 <- length(lam1_JGL)
+    if(length(lam1_JGL) > 1){
+      lam1_JGL <- lam1_JGL[1]
+      multiple_lambda1 <- TRUE
+    } else {multiple_lambda1 <- FALSE}
+
 
     #Analog für lam2 aber dieses mal ist lam1 bekannt
     counter <- 1
@@ -138,9 +164,17 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
     }
 
     lam2_JGL <- lam2[which((JGL_crit2_list) == max(JGL_crit2_list))]
-    if(length(lam2_JGL) > 1){lam2_JGL <- lam2_JGL[1] }
+    L2 <- length(lam2_JGL)
+    if(length(lam2_JGL) > 1){
+      lam2_JGL <- lam2_JGL[1]
+      multiple_lambda2 <- TRUE
+    } else {multiple_lambda2 <- FALSE}
+
     estimation[[1]] <- JGL_tmp2[[which(lam2 == lam2_JGL)]]
     estimation[[2]] <- c(lam1_JGL,lam2_JGL)
+
+    estimation$multiples <- list(multiple_lambda1, multiple_lambda2, L1, L2)
+    return(estimation)
   }
 
 
@@ -158,7 +192,8 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
       estimation_tmp[[2]] <- y$opt.lambda
       estimation[[z]] <- estimation_tmp
     }
+    return(estimation)
   }
 
-  return(estimation)
+
 }

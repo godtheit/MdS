@@ -1,6 +1,6 @@
 Emulate_graph <- function(p, perc1 = 0.05, perc2 = 0.05, length_var1 = 3, length_var2 = 3){
   library(sjmisc)
-  p=150
+  #p=150
   # length_var1 = 3
   # length_var2 = 3
   # perc1 <- perc2 <- 0.05

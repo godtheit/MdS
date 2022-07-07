@@ -32,7 +32,7 @@ th33 <- c(0,0,1,0,0,1,1,1,0) #9
 w <- rbind(th11,th12, th13, th21, th22, th23, th31, th32, th33)
 colnames(w) <- rownames(w)
 
-lam1 <- seq(0.02,2, length.out = 60)
+lam1 <- seq(0.02,1, length.out = 60)
 lam2 <- seq(0.1,2, length.out = 8)
 
 
@@ -50,12 +50,5 @@ List__Estimations_Mds[[t]]  <- procedure(Y = current_network, lam1 = lam1, lam2 
 }
 #hurray
 
-
-test <- sim_graphs(
-p = 150, perc1 = 0.05,
-perc2 = 0.05,
-length_var1 = 3,
-length_var2 = 3,
-observes = 52)
 
 
