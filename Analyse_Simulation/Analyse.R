@@ -51,3 +51,11 @@ List__Estimations_Mds[[t]]  <- procedure(Y = current_network, lam1 = lam1, lam2 
 #hurray
 
 
+test <- sim_graphs(
+p = 150, perc1 = 0.05,
+perc2 = 0.05,
+length_var1 = 3,
+length_var2 = 3,
+observes = 52)
+
+

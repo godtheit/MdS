@@ -1,7 +1,7 @@
 # MdS
 library(MdS2)
 
-mds_wrapper <- function(data, job, instance, ...) {
+MdS_wrapper <- function(data, job, instance, ...) {
 
   current_network <- instance[[1]]
   best_mds <- procedure(Y = current_network, lam1 = lam1, lam2 = lam2, method = "MdS", w = w)
@@ -9,7 +9,7 @@ mds_wrapper <- function(data, job, instance, ...) {
 return(best_mds)
 }
 #jgl
-jgl_wrapper <- function(data, job, instance, ...) {
+JGL_wrapper <- function(data, job, instance, ...) {
 
   current_network <- instance[[1]]
   best_jgl <- procedure(Y = current_network, lam1 = lam1, lam2 = lam2, method = "JGL")
@@ -20,7 +20,7 @@ jgl_wrapper <- function(data, job, instance, ...) {
 glasso_wrapper <- function(data, job, instance, ...) {
 
   current_network <- isntance[[1]]
-  best_mds <- procedure(Y = current_network, lam1 = lam1, lam2 = lam2, method = "MdS", w = w)
+  best_mds <- procedure(Y = current_network, lam1 = lam1, lam2 = lam2, method = "MdS")
 
   return(best_mds)
 }

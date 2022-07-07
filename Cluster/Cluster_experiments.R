@@ -17,12 +17,12 @@ addProblem(name = "sim_graphs", fun = sim_graphs, seed = 43)
 
 # Algorithms -----------------------------------------------------------
 source("Algorithms.R")
-addAlgorithm(name = "Mds", fun = MdS_wrapper)
+addAlgorithm(name = "MdS", fun = MdS_wrapper)
 addAlgorithm(name = "JGL", fun = jgl_wrapper)
 addAlgorithm(name = "glasso", fun = glasso_wrapper)
 
 # Experiments -----------------------------------------------------------
-prob_design <- list(sim_norm = expand.grid(p = 150,
+prob_design <- list(sim_graphs = expand.grid(p = 150,
                                            perc1 = 0.05,
                                            perc2 = 0.05,
                                            length_var1 = 3,
@@ -56,7 +56,9 @@ lam2_JGL <- seq(0.1,2, length.out = 8)
 
 
 algo_design <- list(MdS = expand.grid(lam1 = lam1_MdS, lam2 = lam2_MdS, w = w),
-                    JGL = expand.grid(lam1 = lam1_JGL, lam2 = lam2_JGL))
+                    JGL = expand.grid(lam1 = lam1_JGL, lam2 = lam2_JGL),
+                    glasso = expand.grid(lam1 = 1, lam2 = 1))
+
 addExperiments(prob_design, algo_design, repls = 5) #100
 summarizeExperiments()
 
