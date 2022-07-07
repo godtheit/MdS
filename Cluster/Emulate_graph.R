@@ -56,7 +56,12 @@ for (j in 1:length_var2) {
     tmp <- eval(as.name(paste("A_",i, sep = "")))
 
     tmp[sample(t0_A, a, replace = FALSE)]  <- 1
+
+    if(length(t1_A) == 0){ warning("Tried to remove an edge but there are none to to remove!")
+      } else {
     tmp[sample(t1_A, a, replace = FALSE)]  <- 0
+      }
+
 
     assign(paste("A_", i, sep = ""), tmp)
 
@@ -67,13 +72,18 @@ for (j in 1:length_var2) {
 
 
   t0_B <- t[which(B_1[t]==0)]
+  #if none of them are == 1, what will t1_B be?
+  # it could happen if one side of the network has no nodes
   t1_B <- t[which(B_1[t]==1)]
 
   for (j in 2:length_var2) {
     tmp <- eval(as.name(paste("B_",j, sep = "")))
-
     tmp[sample(t0_B, b, replace = FALSE)]  <- 1
-    tmp[sample(t1_B, b, replace = FALSE)]  <- 0
+
+    if(length(t1_B) == 0){
+      warning("I tried to remove edges but there are none to remove!")
+      } else {tmp[sample(t1_B, b, replace = FALSE)]  <- 0
+      }
 
     assign(paste("B_", j, sep = ""), tmp)
 

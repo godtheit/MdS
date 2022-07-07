@@ -33,12 +33,12 @@ addAlgorithm(name = "JGL", fun = JGL_wrapper)
 addAlgorithm(name = "glasso", fun = glasso_wrapper)
 
 # Experiments -----------------------------------------------------------
-prob_design <- list(sim_graphs = expand.grid(p = 12,
-                                           perc1 = 0.,
-                                           perc2 = 0.2,
-                                           length_var1 = 2,
-                                           length_var2 = 2,
-                                           observes = 2000))
+prob_design <- list(sim_graphs = expand.grid(p = 150,
+                                           perc1 = 0.05,
+                                           perc2 = 0.05,
+                                           length_var1 = 3,
+                                           length_var2 = 3,
+                                           observes = 52))
 
 
 #Setup the weight matrix
@@ -60,11 +60,12 @@ algo_design <- list(MdS = expand.grid(a = 0.1, b = 30, c = 0.1, d = 2, L1 = 20, 
                     JGL = expand.grid(a = 0.1, b = 2, c = 0.1, d = 2, L1 = 20, L2 = 8 ),
                     glasso = expand.grid())
 
-addExperiments(prob_design, algo_design, repls = 5) #100
+addExperiments(prob_design, algo_design, repls = 2)
 summarizeExperiments()
 
 # Test jobs -----------------------------------------------------------
-testJob(id = 1)
+
+testJob(id = 6)
 
 # Submit -----------------------------------------------------------
 if (grepl("node\\d{2}|bipscluster", system("hostname", intern = TRUE))) {
@@ -73,17 +74,16 @@ if (grepl("node\\d{2}|bipscluster", system("hostname", intern = TRUE))) {
   submitJobs(ids = ids, # walltime in seconds, 10 days max, memory in MB
              resources = list(name = reg_name, chunks.as.arrayjobs = TRUE,
   				              ncpus = 1, memory = 6000, walltime = 10*24*3600,
-  							        max.concurrent.jobs = 40))
+  							        max.concurrent.jobs = 200))
 } else {
   submitJobs()
 }
 waitForJobs()
 
-# Get results -------------------------------------------------------------
-res <-  flatten(ijoin(reduceResultsDataTable(), getJobPars()))
-res
+getStatus()
 
-# Plot results -------------------------------------------------------------
-ggplot(res, aes(x = algorithm, y = error)) +
-  facet_grid(problem ~ p) +
-  geom_boxplot()
+# Get results -------------------------------------------------------------
+res <- ijoin(reduceResultsDataTable(), getJobPars())
+
+saveRDS(res, file = "ImportantDataOmg.RDS")
+

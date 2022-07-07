@@ -7,6 +7,7 @@ library(MdS2)
 
 MdS_wrapper <- function(data, job, instance, a, b, c, d, L1, L2, weight_matrix , ...) {
   data <- instance$samples
+
   M <- length(data)
 
   if (weight_matrix == "full"){
@@ -36,6 +37,7 @@ MdS_wrapper <- function(data, job, instance, a, b, c, d, L1, L2, weight_matrix ,
 
   best_mds <- procedure(Y = data, lam1 = lam1, lam2 = lam2, method = "MdS", w = w)
 
+  best_mds$trueAdj <- instance$adj
 return(best_mds)
 }
 #jgl
@@ -44,16 +46,22 @@ JGL_wrapper <- function(data, a, b, c, d, L1, L2, job, instance, ...) {
   lam1 <- seq(a,b, length.out = L1)
   lam2 <- seq(c,d, length.out = L2)
   data <- instance$samples
+
   best_jgl <- procedure(Y = data, lam1 = lam1, lam2 = lam2, method = "fused")
 
+
+  best_jgl$trueAdj <- instance$adjs
   return(best_jgl)
 }
 #glasso
 glasso_wrapper <- function(data, job, instance, ...) {
+
   lam1 <-  1  # these
   lam2 <-  2  # are not used
   data <- instance$samples
   best_glasso <- procedure(Y = data, lam1 = lam1, lam2 = lam2, method = "glasso")
 
+
+  best_glasso$trueAdj <- instance$adj
   return(best_glasso)
 }
