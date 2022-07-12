@@ -110,10 +110,8 @@ if(criteria == "Aic"){
 
     estimation$multiples <- list(multiple_lambda1, multiple_lambda2, L1, L2)
 
-    return(list(estimation = estimation,
-                list_lam1 = MdS_crit1_list,
-                list_lam2 = MdS_crit2_list)
-          )
+    return(estimation)
+
   }
 
 
@@ -210,10 +208,8 @@ if (criteria == "Aic") {
     estimation[[2]] <- c(lam1_JGL,lam2_JGL)
 
     estimation$multiples <- list(multiple_lambda1, multiple_lambda2, L1, L2)
-    return(list(estimation = estimation,
-                list_lam1 = JGL_crit1_list,
-                list_lam2 = JGL_crit2_list)
-            )
+    return(estimation)
+
   }
 
 
