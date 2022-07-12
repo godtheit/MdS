@@ -32,8 +32,8 @@ th33 <- c(0,0,1,0,0,1,1,1,0) #9
 w <- rbind(th11,th12, th13, th21, th22, th23, th31, th32, th33)
 colnames(w) <- rownames(w)
 
-lam1 <- seq(0.02,1, length.out = 60)
-lam2 <- seq(0.1,2, length.out = 8)
+lam1 <- seq(0.1,2, length.out = 20)
+lam2 <- seq(0.01,10, length.out = 8)
 
 
 
@@ -45,8 +45,15 @@ List__Estimations_Mds <- list()
 for (t in 1:1) {#:length(BigListof_samples)) {
 current_network <- filefortest[[2]]
 List_Estimations_glasso[[t]] <- procedure(Y = current_network, lam1 = lam1, lam2 = lam2, method = "glasso")
-List_Estimations_FusedLasso[[t]] <-  procedure(Y = current_network, lam1 = lam1, lam2 = lam2, method = "fused")
-List__Estimations_Mds[[t]]  <- procedure(Y = current_network, lam1 = lam1, lam2 = lam2, method = "MdS", w = w)
+
+List_Estimations_FusedLasso[[1]] <-  procedure(Y = current_network,
+                                               lam1 = lam1, lam2 = lam2, method = "fused")
+List_Estimations_FusedLasso[[2]] <- procedure(Y = current_network, lam1 = lam1, lam2 = lam2,
+                                              method = "fused", criteria = "Bic")
+List__Estimations_Mds[[1]]  <- procedure(Y = current_network, lam1 = lam1,
+                                         lam2 = lam2, method = "MdS", w = w)
+List__Estimations_Mds[[2]]  <- procedure(Y = current_network, lam1 = lam1,
+                                         lam2 = lam2, method = "MdS", w = w, criteria = "Bic")
 }
 #hurray
 

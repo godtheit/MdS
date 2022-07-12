@@ -1,4 +1,4 @@
-procedure <- function(Y, lam1, lam2, method, w = FALSE){
+procedure <- function(Y, lam1, lam2, method, w = FALSE, criteria = "Aic"){
 
   p = dim(Y[[1]])[2] # number of variables
   M = length(Y)      # number of networks
@@ -45,15 +45,24 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
       counter <- counter + 1
     }
 
-
+if(criteria == "Aic"){
     for (c in 1:length(lam1)) {
 
       MdS_crit1_list[c] <- mds_aic(Theta = MdS_tmp1[[c]]$Theta,
                                    S = S,
                                    n = n)
     }
+} else if(criteria == "Bic"){
+  for (c in 1:length(lam1)) {
 
-    lam1_MdS <- lam1[which(MdS_crit1_list == max(MdS_crit1_list))]
+
+  MdS_crit1_list[c] <- mds_bic(Theta = MdS_tmp1[[c]]$Theta,
+                               S = S,
+                               n = n,
+                               p = p)
+  }
+  }
+    lam1_MdS <- lam1[which(MdS_crit1_list == min(MdS_crit1_list))]
 
     L1 <- length(lam1_MdS)
     if(length(lam1_MdS) > 1){
@@ -70,13 +79,21 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
       counter <- counter + 1
     }
 
-
+if(criteria == "Aic"){
     for (c in 1:length(lam2)) {
       MdS_crit2_list[c] <- mds_aic(Theta = MdS_tmp2[[c]]$Theta,
                                    S = S,
                                    n = n)
     }
-    lam2_MdS <- lam2[which((MdS_crit2_list) == max(MdS_crit2_list))]
+} else if(criteria == "Bic"){
+  for (c  in 1:length(lam2)) {
+    MdS_crit2_list[c] <- mds_bic(Theta = MdS_tmp2[[c]]$Theta,
+                                 S = S,
+                                 n = n,
+                                 p = p)
+  }
+}
+    lam2_MdS <- lam2[which((MdS_crit2_list) == min(MdS_crit2_list))]
 
 
     L2 <- length(lam2_MdS)
@@ -93,7 +110,10 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
 
     estimation$multiples <- list(multiple_lambda1, multiple_lambda2, L1, L2)
 
-    return(estimation)
+    return(list(estimation = estimation,
+                list_lam1 = MdS_crit1_list,
+                list_lam2 = MdS_crit2_list)
+          )
   }
 
 
@@ -128,17 +148,23 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
 
 
     #Suche für alle Ergebnisse das Kriterium heraus
-
+if (criteria == "Aic"){
     for (c in 1:length(lam1)) {
       JGL_crit1_list[c] <-       mds_aic(Theta = JGL_tmp1[[c]]$theta,
                                          S = S,
                                          n = n)
-
-
     }
+} else if (criteria == "Bic"){
+  for (c in 1:length(lam1)) {
+    JGL_crit1_list[c] <-       mds_bic(Theta = JGL_tmp1[[c]]$theta,
+                                       S = S,
+                                       n = n,
+                                       p = p)
+  }
+}
 
     #Suche das größte Kriterium
-    lam1_JGL <- lam1[which(JGL_crit1_list == max(JGL_crit1_list))]
+    lam1_JGL <- lam1[which(JGL_crit1_list == min(JGL_crit1_list))]
     L1 <- length(lam1_JGL)
     if(length(lam1_JGL) > 1){
       lam1_JGL <- lam1_JGL[1]
@@ -154,16 +180,26 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
     }
 
 
+if (criteria == "Aic") {
 
     for (c in 1:length(lam2)) {
       JGL_crit2_list[c] <- mds_aic(Theta = JGL_tmp2[[c]]$theta,
                                    S = S,
                                    n = n)
 
-
     }
+} else if (criteria == "Bic"){
 
-    lam2_JGL <- lam2[which((JGL_crit2_list) == max(JGL_crit2_list))]
+  for (c in 1:length(lam2)) {
+    JGL_crit2_list[c] <- mds_bic(Theta = JGL_tmp2[[c]]$theta,
+                                 S = S,
+                                 n = n,
+                                 p = p)
+
+  }
+}
+
+    lam2_JGL <- lam2[which((JGL_crit2_list) == min(JGL_crit2_list))]
     L2 <- length(lam2_JGL)
     if(length(lam2_JGL) > 1){
       lam2_JGL <- lam2_JGL[1]
@@ -174,7 +210,10 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE){
     estimation[[2]] <- c(lam1_JGL,lam2_JGL)
 
     estimation$multiples <- list(multiple_lambda1, multiple_lambda2, L1, L2)
-    return(estimation)
+    return(list(estimation = estimation,
+                list_lam1 = JGL_crit1_list,
+                list_lam2 = JGL_crit2_list)
+            )
   }
 
 
