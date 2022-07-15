@@ -1,4 +1,4 @@
-MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cores = 1,  maxIter = 1000){
+MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-4, cores = 1,  maxIter = 10000){
 
   library(DescTools)
   library(parallel)
@@ -15,7 +15,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
     }
   }
 
-  #Daten zentralisieren
+ ################### #Daten zentralisieren
   for (m in 1:M) {
     for (j in 1:p) {
       Y[[m]][, j] = Y[[m]][, j] - mean(Y[[m]][, j])
@@ -26,29 +26,63 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
 
 
 
-
+############## Prepare Constants #####################
 
   Empty <- matrix(0,p,p)
-
   Theta <- Z  <- U <- betas <- list()
 
     S <- list()
+    eta <- list()
 
   for (m in 1:M) {
     S[[m]] <- (t(Y[[m]]) %*% Y[[m]]) / n[m]
     Theta[[m]] <- diag(1/diag(S[[m]]))
-    Z[[m]] <- U[[m]] <- betas[[m]] <- Empty    #Start the algorithm with an empty network
+    Z[[m]] <- U[[m]] <- Empty    #Start the algorithm with an empty network
+    eta[[m]] <- n[m] / rho
 
   }
 
+
+    ####### Prepare weight matrix ##########################
+    eta_1 <- lambda1/rho
+    eta_2 <- lambda2/rho
+
+
+    signum <- c(c(1,1), vector(mode = "integer",length = M-2))
+    B <-  Permn(signum)
+    Flipp <- FALSE
+    for (i in 1:length(B[,1])) {
+      for (j in 1:length(B[1,])) {
+        if(Flipp == TRUE & B[i,j] == 1){
+          B[i,j] <- -1
+          Flipp <- FALSE
+        } else if (B[i,j] == 1){
+          Flipp <- TRUE
+        }
+
+      }
+    }
+    B_final <- matrix(0,length(B[,1]),length(B[1,]))
+
+
+    for (i in 1:length(B[,1])) {
+      weights <- which( abs(B[i,])== 1)
+      B_final[i,] <- eta_2 * w[weights[2],weights[1]] * B[i,]
+    }
+    C <- eta_1 * diag(M)
+    D <- rbind(C, B_final)
+
+
+
+    row_with_only_zeros <- apply(D, 1, function(row) all(row == 0))
+    matrix_D <- D[!row_with_only_zeros, ]
+
+
+
+####################initiate iterationssteps ###########
   k <- 0
-
-
-
-
-
-
   diff_value = 10
+
   while((k==0) || ((k < maxIter) && diff_value > epsilon))
   {
 
@@ -66,17 +100,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
 
 
 
-  #Update Step Theta
-    eta <- list()
-    A <- list()
-
-  for (m in 1:M) {
-    #A[[m]] <- ((Z_old[[m]] - U_old[[m]]) )
-    eta[[m]] <- n[m] / rho
-
-  }
-
-
+ ############# #Update Step Theta ###################
     for (m in 1:M) {
       #copied from Danaher
       G = eigen(S[[m]] - rho*Z[[m]]/n[m] + rho*U[[m]]/n[m])
@@ -98,7 +122,7 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
     # Theta[[m]] <- Theta_k
   }
 
-    #Update Step Z
+   #########################Update Step Z #########################
 
 
     y <- list()
@@ -106,42 +130,6 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
       for (m in 1:M) {
        y[[m]] <- Theta[[m]] + U_old[[m]]
       }
-
-
-    #y <- mapply(function(x,y){x+y}, Theta, U_old)
-
-   eta_1 <- lambda1/rho
-   eta_2 <- lambda2/rho
-
-## Create Matrix D
-     signum <- c(c(1,1), vector(mode = "integer",length = M-2))
-     B <-  Permn(signum)
-     Flipp <- FALSE
-     for (i in 1:length(B[,1])) {
-       for (j in 1:length(B[1,])) {
-          if(Flipp == TRUE & B[i,j] == 1){
-             B[i,j] <- -1
-             Flipp <- FALSE
-          } else if (B[i,j] == 1){
-         Flipp <- TRUE
-           }
-
-        }
-     }
-     B_final <- matrix(0,length(B[,1]),length(B[1,]))
-
-
-     for (i in 1:length(B[,1])) {
-       weights <- which( abs(B[i,])== 1)
-       B_final[i,] <- eta_2 * w[weights[2],weights[1]] * B[i,]
-     }
-     C <- eta_1 * diag(M)
-     D <- rbind(C, B_final)
-
-
-
-     row_with_only_zeros <- apply(D, 1, function(row) all(row == 0))
-     D <- D[!row_with_only_zeros, ]
 
 
      for (m in 1:M) {
@@ -161,14 +149,14 @@ yps <- c()
   yps[m] <- y[[m]][[i,j]]
   }
 
-  genL <- genlasso(y = yps, diag(1, m), D, minlam = 1, verbose = F)
+  genL <- genlasso(y = yps, diag(1, m), matrix_D, minlam = 1, verbose = F)
   #genL <- genlasso(y = yps, diag(1, m), D = NewWeights, minlam = 1, verbose = F)
   out <- coef(genL, lambda = 1)$beta
 
   #out[which(abs(out) <= 10^-12)] <- 0
 
   for (m in 1:M) {
-    Z[[m]][i,j] <- Z[[m]][i,j]  <- out[m]
+    Z[[m]][i,j] <- Z[[m]][j,i]  <- out[m]
   }
 
   }
@@ -179,7 +167,7 @@ yps <- c()
 
 
     for (m in 1:M) {
-      U[[m]] <- U_old[[m]]  + Theta[[m]] - Z[[m]]
+      U[[m]] <- U_old[[m]]  + (Theta[[m]] - Z[[m]])
 
     }
 
