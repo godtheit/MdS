@@ -36,8 +36,8 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
 
   for (m in 1:M) {
     S[[m]] <- (t(Y[[m]]) %*% Y[[m]]) / n[m]
-    Theta[[m]] <- diag(p)
-    Z[[m]] <- U[[m]] <- betas[[m]] <- Empty    #Start the algorithm with a empty network
+    Theta[[m]] <- diag(1/diag(S[[m]]))
+    Z[[m]] <- U[[m]] <- betas[[m]] <- Empty    #Start the algorithm with an empty network
 
   }
 
@@ -80,10 +80,10 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
     for (m in 1:M) {
       #copied from Danaher
       G = eigen(S[[m]] - rho*Z[[m]]/n[m] + rho*U[[m]]/n[m])
-      D = edecomp$values
-      Q = edecomp$vectors
+      D = G$values
+      Q = G$vectors
       D2 = n[m]/(2*rho) * ( -D + sqrt(D^2 + 4*rho/n[m]) )
-      theta[[m]] = Q %*% diag(D2) %*% t(Q)
+      Theta[[m]] = Q %*% diag(D2) %*% t(Q)
 
 
       #formula for theta from hallac
@@ -152,22 +152,28 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cor
      ### Use generalized Lasso on all possible Edges
 combinations <- combn(1:p, 2, simplify = FALSE)
 
-mclapply(combinations, function(combs){
-  yps <- sapply(y, function(M) M[combs[1], combs[2]])
+for (all_edges in 1:length(combinations)) {
+  i <- combinations[[all_edges]][1]
+  j <- combinations[[all_edges]][2]
 
-
-
+yps <- c()
+  for (m in 1:M) {
+  yps[m] <- y[[m]][[i,j]]
+  }
 
   genL <- genlasso(y = yps, diag(1, m), D, minlam = 1, verbose = F)
+  #genL <- genlasso(y = yps, diag(1, m), D = NewWeights, minlam = 1, verbose = F)
   out <- coef(genL, lambda = 1)$beta
 
   #out[which(abs(out) <= 10^-12)] <- 0
 
   for (m in 1:M) {
-    Z[[m]][combs[1],combs[2]] <<- Z[[m]][combs[2],combs[1]]  <<- out[m]
+    Z[[m]][i,j] <- Z[[m]][i,j]  <- out[m]
   }
 
-}, mc.cores = cores )
+  }
+
+
 
 
 
@@ -202,7 +208,7 @@ mclapply(combinations, function(combs){
 
   for (m in 1:M) {
       adj <- Empty
-      adj[which(Z[[m]] < 1e-12)] <- 0   #HERE put the
+      adj[abs(which(Z[[m]]) < 1e-12)] <- 0
       adj[which(Z[[m]]!=0)] <- 1
       diag(adj) <- 0
       adj[upper.tri(adj, diag = T) == TRUE] <- 0
