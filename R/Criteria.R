@@ -1,4 +1,4 @@
-procedure <- function(Y, lam1, lam2, method, w = FALSE, criteria = "Aic", epsilon = 1e-4, maxIter = 1000){
+procedure <- function(Y, lam1, lam2, method, w = FALSE, criteria = "Aic", epsilon = 1e-4, maxIter = 500){
 
   p = dim(Y[[1]])[2] # number of variables
   M = length(Y)      # number of networks
