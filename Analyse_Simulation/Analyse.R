@@ -50,8 +50,8 @@ colnames(w_distance) <- rownames(w_distance)
 g <- matrix(1 , 9, 9)
 g[which(upper.tri(w, diag = TRUE)==TRUE)] <- 0
 
-lam1 <- seq(0.1,2, length.out = 20)
-lam2 <- seq(0.01,10, length.out = 8)
+lam1 <- seq(0.1,30, length.out = 20)
+lam2 <- seq(0.01,2, length.out = 8)
 
 
 

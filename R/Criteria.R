@@ -1,4 +1,4 @@
-procedure <- function(Y, lam1, lam2, method, w = FALSE, criteria = "Aic", epsilon = 1e-4){
+procedure <- function(Y, lam1, lam2, method, w = FALSE, criteria = "Aic", epsilon = 1e-4, maxIter = 1000){
 
   p = dim(Y[[1]])[2] # number of variables
   M = length(Y)      # number of networks
@@ -41,7 +41,8 @@ procedure <- function(Y, lam1, lam2, method, w = FALSE, criteria = "Aic", epsilo
     #Do MdS for all lamba1
     counter <- 1
     for (a in lam1) {
-      MdS_tmp1[[counter]] <-  MdS(Y = obs, lambda1 = a, lambda2 = 0.2 , w = w, epsilon = epsilon)
+      MdS_tmp1[[counter]] <-  MdS(Y = obs, lambda1 = a, lambda2 = 0.2 , w = w,
+                                  epsilon = epsilon, maxIter = maxIter)
       counter <- counter + 1
     }
 
@@ -75,7 +76,8 @@ if(criteria == "Aic"){
 
     counter <- 1
     for (b in lam2) {
-      MdS_tmp2[[counter]] <-  MdS(Y = obs, lambda1 = lam1_MdS, lambda2 = b , w = w, epsilon = epsilon)
+      MdS_tmp2[[counter]] <-  MdS(Y = obs, lambda1 = lam1_MdS, lambda2 = b , w = w,
+                                  epsilon = epsilon, maxIter = maxIter)
       counter <- counter + 1
     }
 
@@ -137,7 +139,8 @@ if(criteria == "Aic"){
     counter <- 1
     for (a in lam1) {
       JGL_tmp1[[counter]] <- JGL(Y = obs, lambda1 = a, lambda2 = 0.2,
-                                 penalty = "fused", return.whole.theta = T, tol = epsilon)
+                                 penalty = "fused", return.whole.theta = T,
+                                 tol = epsilon, maxiter = maxIter)
       counter <- counter + 1
     }
 
@@ -175,7 +178,8 @@ if (criteria == "Aic"){
     counter <- 1
     for (b in lam2) {
       JGL_tmp2[[counter]] <- JGL(Y = obs, lambda1 = lam1_JGL, lambda2 = b,
-                                 penalty = "fused", return.whole.theta = T, tol = epsilon)
+                                 penalty = "fused", return.whole.theta = T,
+                                 tol = epsilon, maxiter = maxIter)
       counter <- counter + 1
     }
 

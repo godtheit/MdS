@@ -1,4 +1,4 @@
-MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-4, cores = 1,  maxIter = 10000){
+MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-3, cores = 1,  maxIter = 10000){
 
   library(DescTools)
   library(parallel)
@@ -76,6 +76,14 @@ MdS <- function(Y, rho = 1, lambda1 = 0.1, lambda2= 0.1, w , epsilon = 1e-4, cor
 
     row_with_only_zeros <- apply(D, 1, function(row) all(row == 0))
     matrix_D <- D[!row_with_only_zeros, ]
+
+
+
+    ### Emergency exit for non converging cases
+    diff_value1 <- 0
+    diff_value2 <- 0
+    diff_value3 <- 0
+    diff_value4 <- 0
 
 
 
@@ -182,10 +190,30 @@ yps <- c()
      # Stopping Criterea from Danaher
     k <- k + 1
     diff_value = 0
-    for(m in 1:M) {diff_value = diff_value + sum(abs(Theta[[m]] - Theta_old[[m]])) / sum(abs(Theta_old[[m]]))}
+
+    for(m in 1:M) {
+      diff_value = diff_value + sum(abs(Theta[[m]] - Theta_old[[m]])) / sum(abs(Theta_old[[m]]))
+      }
 
     cat(sprintf("iteration %d  |  %f\n", k, diff_value))
 
+    diff_value2 <- diff_value1
+    diff_value1 <- diff_value
+
+
+exiter <- diff_value2 - diff_value1
+
+    if (k == maxIter) {
+      warning("We reached the max Iteration, without meeting coversion criteria, last value was ",
+              diff_value)
+    }
+
+
+    if (abs(exiter) < 1e-7 & diff_value > epsilon) {
+      k <- maxIter
+      warning("Did Not Converge for lambda1 = ", lambda1, " lambda2 = " ,
+              lambda2 , "||   last Iterationvalue at ", diff_value)
+    }
 
    }#Ende While, bzw Repeat
 
@@ -195,8 +223,9 @@ yps <- c()
 
 
   for (m in 1:M) {
+     Z[[m]][which(abs(Z[[m]]) < 1e-12)] <- 0
+
       adj <- Empty
-      adj[abs(which(Z[[m]]) < 1e-12)] <- 0
       adj[which(Z[[m]]!=0)] <- 1
       diag(adj) <- 0
       adj[upper.tri(adj, diag = T) == TRUE] <- 0
