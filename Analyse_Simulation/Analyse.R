@@ -16,7 +16,7 @@ path <- "H:/Documents/MdS/Analyse_simulation"
 load("allsamples.RData")
 load("alladjacs.RData")
 
-
+x <- readRDS("Analyse_Simulation/Gen_network_MdS.RDS")
 
 filefortest <- readRDS("test-dataset.RDS")
 th11 <- c(0,0,0,0,0,0,0,0,0) #1
