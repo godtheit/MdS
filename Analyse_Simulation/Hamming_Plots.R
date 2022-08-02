@@ -1,37 +1,56 @@
-setwd("H:/Documents/MdS/Analyse_Simulation")
+setwd("H:/Documents/MdS/Analyse_Simulation/")
 source("get_rates.R")
 
 
-Daten <- readRDS("ImportantDataOmg_3fortest.RDS")
 
 
 
 
-TrueAdjs           <- Daten$trueAdj
-sharedAdjs         <- Daten$sharedAdj
-MdS_decreasing_est <- Daten$placehodler1
-MdS_hv_est         <- Daten$placehodler2         #horizontal/vertikal
-JGL_est            <- Daten$placehodler3
-Glasso_est         <- Daten$placehodler4
+funfzig <- readRDS("test500.RDS")
+
+zwoelf <- readRDS("Test12.RDS")
+
+eins <- readRDS("TestMdS1.RDS")
+zwei <- readRDS("TestMdS2.RDS")
+drei <- readRDS("TestMdS3.RDS")
+vier <- readRDS("TestMdS4.RDS")
+
+load("alladjacs.RData")
 
 
-MdS1_list <- MdS2_list <- JGL_list <- Glasso_list <- list()
+get_rates(BigListof_adjencies[[1]][[2]],zwoelf$adj_matrices[[4]])
+#TrueAdjs <- BigListof_adjencies[[1]]
+#sharedAdjs         <- eins$shared_adj
+#   zeros_shared <- matrix(0,67,67)
+#shared_adjacency <- rbind(cbind(zeros_shared, zeros_shared), cbind(sharedAdjs,zeros_shared)    )
 
-for(k in 1:length(Daten)){ #20
+
+
+
+#JGL_est            <- Daten$placehodler3
+#Glasso_est         <- Daten$placehodler4
+
+
+MdS_list  <- JGL_list <- Glasso_list <- list()
+
+for(k in 1:20){
+  Daten <- readRDS(paste0("H:/Documents/MdS/Cluster/Ergebnisse/",k, ".RDS")  )
+  TrueAdjs <- Daten$trueAdj
+  MdS_est            <- Daten$adj_matrices
+  MdS  <- JGL <- Glasso <- as.data.frame(matrix(0,9,3))
+  colnames(MdS) <- names(JGL) <- names(Glasso) <- c("Hamming-Distance", "Precision", "Recall")
   for (m in 1:9) {
-    TrAdj <- TrueAdj[[m]]
 
-    MdS1 <- MdS2 <- JGL <- Glasso <- as.data.frame(matrix(0,9,3))
-    colnames(MdS1) <- names(MdS2) <- names(JGL) <- names(Glasso) <- c("Hamming-Distance", "Precision", "Recall")
 
-    MdS1[m,] <- get_rates(TrAdj, MdS_decreasing_est[[m]])
-    MdS2[m,] <- get_rates(TrAdj, MdS_hv_est[[m]])
-    JGL[m,] <- get_rates(TrAdj, JGL_est[[m]])
-    Glasso[m,] <- get_rates(TrAdj, Glasso_est[[m]])
+
+
+
+    MdS[m,] <- get_rates(TrueAdjs[[m]], MdS_est[[m]])
+    #JGL[m,] <- get_rates(TrAdj, JGL_est[[m]])
+    #Glasso[m,] <- get_rates(TrAdj, Glasso_est[[m]])
   }
 
-  MdS1_list[[k]] <- MdS1
-  MdS2_list[[k]] <- MdS2
+  MdS_list[[k]] <- MdS
   JGL_list[[k]] <- JGL
   Glasso_list[[k]] <- Glasso
 }

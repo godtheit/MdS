@@ -1,13 +1,15 @@
    get_rates <- function(TrueAdj, SimAdj){
 
+   TrueAdj[which(upper.tri(TrueAdj,diag = TRUE))] <- 5
+   SimAdj[which(upper.tri(SimAdj,diag = TRUE))] <- 6
 
    tet <- (TrueAdj == SimAdj)
    tet[which(upper.tri(tet, diag = TRUE))] <- "irrelevant"
 
-   TP <- sum(testmatrix2[which(tet == TRUE & testmatrix2 == 1)])
-   TN <- sum(testmatrix2[which(tet == TRUE & testmatrix2 == 0)])
-   FP <- sum(testmatrix2[which(tet == FALSE & testmatrix2 == 1)])
-   FN <- sum(testmatrix2[which(tet == FALSE & testmatrix2 == 0)])
+   TP <- length(which(tet == TRUE & SimAdj == 1))
+   TN <- length(which(tet == TRUE & SimAdj == 0))
+   FP <- length(which(tet == FALSE & SimAdj == 1))
+   FN <- length(which(tet == FALSE & SimAdj == 0))
 
    hamming <- FP + FN
    Prec    <- TP/(TP + FP)
