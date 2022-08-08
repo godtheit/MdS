@@ -1,5 +1,6 @@
 #setwd("H:/Documents/MdS/Daten_der_Analyse")
-setwd("C:/Users/Arne/Dropbox/Masterarbeit/MdS/Daten_der_Analyse")
+#setwd("C:/Users/Arne/Dropbox/Masterarbeit/MdS/Daten_der_Analyse")
+setwd("C:/Users/arne2/Dropbox/Masterarbeit/MdS/Daten_der_Analyse")
 library(igraph)
 library(visNetwork)
 library(gridExtra)
@@ -52,7 +53,7 @@ for (m in 1:9) {
   for (i in 1:length(E(graphs[[m]]))) {
     if (is.na(E(graphs[[m]])$color_1[i]) == TRUE) {
       E(graphs[[m]])$color[i] <- "red"
-    } else { E(graphs[[m]])$color[i] <- "blue"}
+    } else { E(graphs[[m]])$color[i] <- "lightblue"}
 
   }
 }
@@ -61,20 +62,20 @@ Gruppe <- c("GruppeA", "GruppeB", "GruppeC")
 Strahlung <- c("0gy", "0.05gy", "2gy")
 
 
-# path <- "C:/Users/Arne/Dropbox/Masterarbeit/MdS/Daten_der_Analyse/Graphs/Graphs_mit_Farbe"
-# counter <- 1
-# for (i in 1:3) {
-#   for (j in 1:3) {
-#     png(file=paste(path, "/Theta", i,j, ".png", sep = ""), width= 960, height = 960, res = 120)
-#     plot(graphs[[counter]], layout = layout_on_grid ,vertex.size = 0.1)
-#     legend("topright", legend=c("Kernnetzwerk", "Änderung"),
-#            col=c("blue", "red"), lty=1, cex=0.8,
-#            box.lty=0)
-#     title(paste(Gruppe[j],Strahlung[i]))
-#     dev.off()
-#     counter <- counter + 1
-#   }
-# }
+path <- "C:/Users/arne2/Dropbox/Masterarbeit/MdS/Daten_der_Analyse/Graphs/Graphs_mit_Farbe"
+counter <- 1
+for (i in 1:3) {
+  for (j in 1:3) {
+    png(file=paste(path, "/Theta(andereFarbe)", i,j, ".png", sep = ""), width= 960, height = 960, res = 120)
+    plot(graphs[[counter]], layout = layout_on_grid ,vertex.size = 0.1)
+    legend("topright", legend=c("Kernnetzwerk", "Änderung"),
+           col=c("lightblue", "red"), lty=1, cex=0.8,
+           box.lty=0)
+    title(paste(Gruppe[j],Strahlung[i]))
+    dev.off()
+    counter <- counter + 1
+  }
+}
 
 
 
